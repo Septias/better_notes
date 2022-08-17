@@ -2,11 +2,15 @@ use self::todos::Daylies;
 
 #[derive(serde::Deserialize, serde::Serialize)]
 #[serde(default)] // if we add new fields, give them default values when deserializing old state
-pub struct BetterNotes {}
+pub struct BetterNotes {
+    daylies: Daylies,
+}
 
 impl Default for BetterNotes {
     fn default() -> Self {
-        Self {}
+        Self {
+            daylies: Daylies::new(),
+        }
     }
 }
 
@@ -16,11 +20,9 @@ impl BetterNotes {
         // This is also where you can customized the look at feel of egui using
         // `cc.egui_ctx.set_visuals` and `cc.egui_ctx.set_fonts`.
 
-        // Load previous app state (if any).
-        // Note that you must enable the `persistence` feature for this to work.
-        /* if let Some(storage) = cc.storage {
-            return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
-        } */
+        if let Some(storage) = cc.storage {
+            //return eframe::get_value(storage, eframe::APP_KEY).unwrap_or_default();
+        }
 
         Default::default()
     }
@@ -29,7 +31,7 @@ impl BetterNotes {
 mod todos {
     use std::collections::HashMap;
 
-    #[derive(Debug, Default)]
+    #[derive(Debug, Default, serde::Deserialize, serde::Serialize)]
     pub struct Daylies {
         daylies: HashMap<String, bool>,
     }
@@ -37,16 +39,22 @@ mod todos {
     impl Daylies {
         pub fn new() -> Self {
             Self {
-                daylies: [(String::from("hi"), true)].into(),
+                daylies: [
+                    (String::from("Commit"), true),
+                    (String::from("Anki"), true),
+                    (String::from("Schwidisch"), true),
+                    (String::from("Musik"), true),
+                    (String::from("Tanzen"), true),
+                    (String::from("Lesen"), true),
+                    (String::from("Workout"), true),
+                ]
+                .into(),
             }
         }
 
         pub fn show(&mut self, ui: &mut egui::Ui) {
             for (text, checked) in &mut self.daylies {
-                if ui.checkbox(checked, text).changed() {
-                    *checked = false;
-                    println!("hi, {}", checked);
-                }
+                ui.checkbox(checked, text);
             }
         }
     }
@@ -54,13 +62,12 @@ mod todos {
 
 impl eframe::App for BetterNotes {
     fn save(&mut self, storage: &mut dyn eframe::Storage) {
-        //eframe::set_value(storage, eframe::APP_KEY, self);
+        eframe::set_value(storage, eframe::APP_KEY, self);
     }
 
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::Window::new("Daily Todos").show(ctx, |ui| {
-            ui.label("Dailies");
-            Daylies::new().show(ui);
+            self.daylies.show(ui);
         });
     }
 }
