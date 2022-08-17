@@ -17,8 +17,8 @@ crate-type = ["cdylib", "rlib"]
 
 
 [dependencies]
-egui = "0.18.0"
-eframe = { version = "0.18.0", features = ["persistence"] }
+egui = {path = "submodules/egui/egui"}
+eframe = { path = "submodules/egui/eframe" }
 serde = { version = "1", features = ["derive"] } # You only need this if you want app persistence
 
 # native:
